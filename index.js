@@ -1,3 +1,15 @@
+const express = require("express");
+
+const app = express();
+
+app.get("/", (req, res) => {
+    res.send("Bot działa!");
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Serwer działa na porcie ${PORT}`);
+});
 require('dotenv').config();
 
 const fs = require('fs');

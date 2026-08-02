@@ -1,8 +1,8 @@
 require('dotenv').config();
-
-const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
+
+const { REST, Routes } = require('discord.js');
 
 const commands = [];
 const commandsPath = path.join(__dirname, 'commands');
@@ -10,24 +10,26 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 
 for (const file of commandFiles) {
     const command = require(path.join(commandsPath, file));
-    commands.push(command.data.toJSON());
+
+    if ('data' in command && 'execute' in command) {
+        commands.push(command.data.toJSON());
+    } else {
+        console.log(`[WARNING] Komenda ${file} nie ma właściwości "data" lub "execute".`);
+    }
 }
 
 const rest = new REST({ version: '10' }).setToken(process.env.TOKEN);
 
 (async () => {
     try {
-        console.log('🔄 Rejestrowanie komend...');
+        console.log(`Rozpoczynam rejestrację ${commands.length} komend.`);
 
         await rest.put(
-            Routes.applicationGuildCommands(
-                '1529565663675416787',
-                '1454647453662838966'
-            ),
-            { body: commands },
+            Routes.applicationCommands(process.env.CLIENT_ID),
+            { body: commands }
         );
 
-        console.log('✅ Komendy zostały zarejestrowane!');
+        console.log('✅ Komendy zostały pomyślnie zarejestrowane.');
     } catch (error) {
         console.error(error);
     }
